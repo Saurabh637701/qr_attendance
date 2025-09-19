@@ -1,0 +1,183 @@
+{% extends 'qr_app/base.html' %}
+{% load static %}
+{% block content %}
+<div class="row">
+  <!-- Left: QR Generator -->
+  <div class="col-md-5">
+    <div class="card p-3 mb-3">
+      <h4 class="mb-3">🔑 Generate QR (Subject wise)</h4>
+
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label">Select Subject</label>
+          <select name="subject" class="form-select" required>
+            <option value="">-- select subject --</option>
+            {% for subject in subjects %}
+              <option value="{{ subject.id }}">{{ subject.name }} — ({{ subject.code }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Duration</label>
+          <select name="duration" class="form-select" required>
+            <option value="5">5 minutes</option>
+            <option value="10">10 minutes</option>
+            <option value="15">15 minutes</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary w-100" type="submit">Generate & Show QR</button>
+      </form>
+
+      <!-- After generate: QR preview -->
+      <div id="qr-block" class="text-center mt-4" style="display: {% if qr_code %}block{% else %}none{% endif %};">
+        <div class="mb-2 text-muted">
+          <small>Session: <strong id="session-code">{% if qr_session %}{{ qr_session.id }}{% endif %}</strong></small><br>
+          <small>Expires at: <span id="expires-at">{% if qr_session %}{{ qr_session.expires_at }}{% endif %}</span></small>
+        </div>
+
+        {% if qr_code %}
+          <div class="card d-inline-block p-3" style="background:white;">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid">
+          </div>
+   
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Live Attendance -->
+  <div class="col-md-7">
+    <div class="card p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mb-0">📡 Live Attendance</h4>
+        <div>
+          <span id="live-status" class="badge bg-secondary">No session</span>
+        </div>
+      </div>
+
+      <div id="live-area">
+        <p class="text-muted">Live list will appear here after QR generation.</p>
+      </div>
+
+      <div class="mt-3 text-end">
+        <button id="stopPollingBtn" class="btn btn-outline-danger btn-sm" style="display:none;">Stop Live</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Helper: set up polling ---
+  let pollInterval = null;
+  let currentSessionId = {% if qr_session %}{{ qr_session.id }}{% else %}null{% endif %};
+
+  function startPolling(sessionId) {
+    if (!sessionId) return;
+    currentSessionId = sessionId;
+    document.getElementById('live-status').textContent = 'Live';
+    document.getElementById('live-status').className = 'badge bg-success';
+    document.getElementById('stopPollingBtn').style.display = 'inline-block';
+
+    // initial fetch
+    fetchAttendance();
+
+    // poll every 3 seconds
+    pollInterval = setInterval(fetchAttendance, 3000);
+  }
+
+  function stopPolling() {
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = null;
+    document.getElementById('live-status').textContent = 'Stopped';
+    document.getElementById('live-status').className = 'badge bg-warning';
+    document.getElementById('stopPollingBtn').style.display = 'none';
+  }
+
+  async function fetchAttendance() {
+    if (!currentSessionId) return;
+    try {
+      const res = await fetch(`/api/session/${currentSessionId}/attendance/`);
+      if (!res.ok) {
+        // session expired or error
+        const text = await res.text();
+        document.getElementById('live-area').innerHTML = `<div class="alert alert-warning">Session ended or error: ${res.status}</div>`;
+        stopPolling();
+        return;
+      }
+      const data = await res.json();
+      // render records
+      const list = data.records;
+      if (!list || list.length === 0) {
+        document.getElementById('live-area').innerHTML = `<div class="text-muted">No students have marked attendance yet.</div>`;
+      } else {
+        let html = `<table class="table table-sm table-striped"><thead class="table-dark"><tr><th>Roll</th><th>Name</th><th>Time</th></tr></thead><tbody>`;
+        list.forEach(r => {
+          html += `<tr><td>${r.roll_no}</td><td>${r.name}</td><td>${r.timestamp}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('live-area').innerHTML = html;
+      }
+
+      if (!data.active) {
+        // session expired -> show notice and stop
+        document.getElementById('live-area').insertAdjacentHTML('beforeend', `<div class="alert alert-warning mt-2">QR session has expired.</div>`);
+        stopPolling();
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('live-area').innerHTML = `<div class="alert alert-danger">Error fetching live attendance.</div>`;
+      stopPolling();
+    }
+  }
+
+  // --- Stop polling button ---
+  document.getElementById('stopPollingBtn').addEventListener('click', stopPolling);
+
+  // --- If page loaded with a QR session already in context, start polling ---
+  if (currentSessionId) {
+    startPolling(currentSessionId);
+    document.getElementById('qr-block').style.display = 'block';
+  }
+
+  // --- AJAX submit for generate form (prevents full page reload) ---
+  document.getElementById('generateForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // Post to same URL (server generate_qr view must accept POST and return JSON when requested by AJAX)
+    try {
+      const res = await fetch("{% url 'qr_generate' %}", {
+        method: "POST",
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: formData
+      });
+
+      // Expect JSON: { ok: true, qr_code: "<base64>", qr_url: "...", session_id: 12, expires_at: "..." }
+      const data = await res.json();
+      if (!data.ok) {
+        alert(data.error || "Failed to generate QR");
+        return;
+      }
+
+      // Update QR area
+      document.getElementById('qr-image').src = `data:image/png;base64,${data.qr_code}`;
+      document.getElementById('qr-link').textContent = data.qr_url;
+      document.getElementById('qr-link').href = data.qr_url;
+      document.getElementById('session-code').textContent = data.session_id;
+      document.getElementById('expires-at').textContent = data.expires_at;
+      document.getElementById('qr-block').style.display = 'block';
+
+      // start polling live attendance for this session
+      startPolling(data.session_id);
+
+    } catch (err) {
+      console.error(err);
+      alert("Server error while generating QR");
+    }
+  });
+</script>
+{% endblock %}

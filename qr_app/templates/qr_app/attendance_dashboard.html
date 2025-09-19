@@ -1,0 +1,83 @@
+{% extends 'qr_app/base.html' %}
+{% block content %}
+<div class="card p-4">
+    <h2 class="mb-3">📊 Attendance Dashboard</h2>
+
+    <!-- Filter Form -->
+    <form method="GET" class="row g-3 mb-4 align-items-center">
+    <div class="col-auto">
+        <select name="subject" class="form-select shadow-sm" required>
+            <option value="">-- Select Subject --</option>
+            {% for subject in subjects %}
+                <option value="{{ subject.id }}" {% if selected_subject and selected_subject.id == subject.id %}selected{% endif %}>
+                    {{ subject.name }} ({{ subject.code }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <input type="date" name="date" class="form-control shadow-sm" 
+               value="{{ selected_date|date:'Y-m-d' }}" required>
+    </div>
+
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary shadow-sm">
+            🔍 Show
+        </button>
+    </div>
+
+    {% if selected_subject %}
+    <div class="col-auto">
+        <a href="?subject={{ selected_subject.id }}&date={{ selected_date|date:'Y-m-d' }}&export=csv"
+           class="btn btn-success shadow-sm">
+            📑 Export CSV
+        </a>
+    </div>
+    <div class="col-auto">
+        <a href="?subject={{ selected_subject.id }}&date={{ selected_date|date:'Y-m-d' }}&export=pdf"
+           class="btn btn-danger shadow-sm">
+            📄 Export PDF
+        </a>
+    </div>
+    {% endif %}
+</form>
+
+
+    {% if selected_subject %}
+    <!-- Subject Heading -->
+    <h4 class="text-center mb-3">
+        {{ selected_subject.name }} ({{ selected_subject.code }})  
+        — Date: {{ selected_date|date:"d M Y" }}
+    </h4>
+
+    <!-- Attendance Table -->
+    <table class="table table-bordered text-center align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+                <tr>
+                    <td>{{ student.roll_no }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>
+                        {% if student.id in present_ids %}
+                            ✅
+                        {% else %}
+                            ❌
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info">Please select a subject and date to view attendance.</div>
+    {% endif %}
+</div>
+{% endblock %}

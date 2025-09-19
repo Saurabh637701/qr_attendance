@@ -1,0 +1,17 @@
+{% extends 'qr_app/base.html' %}
+{% block content %}
+<h2>➕ Add New Student</h2>
+<form method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label">Roll No</label>
+        <input type="text" name="roll_no" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Student Name</label>
+        <input type="text" name="name" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-success">Save</button>
+    <a href="{% url 'student_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'qr_app/base.html' %}
+{% block content %}
+<div class="text-center">
+    <h1 class="mb-4">🎓 Welcome to QR Attendance System</h1>
+    <p class="lead">Easily manage student attendance using QR Codes.</p>
+
+    <a href="{% url 'generate_qr' %}" class="btn btn-primary btn-lg mt-3">Generate QR Code</a>
+    <a href="{% url 'attendance_dashboard' %}" class="btn btn-success btn-lg mt-3">View Dashboard</a>
+</div>
+{% endblock %}

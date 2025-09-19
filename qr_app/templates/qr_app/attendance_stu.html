@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Attendance</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: linear-gradient(90deg, #00a8ff, #273c75);
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+    .filter-btns .btn {
+      border-radius: 20px;
+    }
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 14px;
+      color: #718093;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h3>📅 My Attendance</h3>
+  <p>{{ student.name }} ({{ student.roll_no }})</p>
+  <small>{{ student.branch }} | Sem {{ student.semester }}</small>
+</header>
+
+<div class="container mt-3">
+  <!-- 🔹 Filter Buttons -->
+  <div class="d-flex justify-content-center gap-2 filter-btns mb-3">
+    <a href="?filter=today" class="btn btn-sm {% if filter == 'today' %}btn-primary{% else %}btn-outline-primary{% endif %}">Today</a>
+    <a href="?filter=week" class="btn btn-sm {% if filter == 'week' %}btn-primary{% else %}btn-outline-primary{% endif %}">Last 7 Days</a>
+    <a href="?filter=all" class="btn btn-sm {% if filter == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">All Records</a>
+  </div>
+
+  <!-- 🔹 Attendance Records -->
+  {% if attendance %}
+    <div class="row g-3">
+      {% for record in attendance %}
+      <div class="col-12">
+        <div class="card p-3">
+          <h6 class="fw-bold">{{ record.qr_session.subject.name }}</h6>
+          <p class="mb-1"><b>Date:</b> {{ record.timestamp|date:"d-m-Y" }}</p>
+          <p class="mb-1"><b>Time:</b> {{ record.timestamp|time:"H:i:s" }}</p>
+          <span class="badge bg-success">✅ Present</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-muted">No attendance records found.</p>
+  {% endif %}
+</div>
+
+<div class="footer">
+  <p>&copy; {{ now|date:"Y" }} QR Attendance System</p>
+</div>
+
+</body>
+</html>

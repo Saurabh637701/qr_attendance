@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Attendance Success</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <header>
+    <img src="{% static 'images/logo.png' %}" alt="College Logo" style="height:50px; vertical-align:middle;">
+    <h1>📚 QR Attendance System</h1>
+    <nav>          
+            <a href="{% url 'attendance_stu' %}">View Attendance</a>           
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="alert alert-success">
+      <h4>✅ Attendance Marked Successfully</h4>
+      <p><b>Roll No:</b> {{ student.roll_no }}</p>
+      <p><b>Name:</b> {{ student.name }}</p>
+      <p><b>Subject:</b> {{ subject.name }}</p>
+      <p><b>Session:</b> {{ qr_session.start_time }} - {{ qr_session.expires_at }}</p>
+    </div>
+    <a href="/" class="btn btn-primary">Back to Home</a>
+  </main>
+
+  <footer style="text-align:center; margin-top:20px; color:#718093;">
+    <p>&copy; {{ now|date:"Y" }} College QR Attendance System</p>
+  </footer>
+</body>
+</html>

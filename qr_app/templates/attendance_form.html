@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Attendance System</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/script.js' %}"></script>
+</head>
+<body>
+    <header>
+        <img src="{% static 'images/logo.png' %}" alt="College Logo" style="height:50px; vertical-align:middle;">
+        <h1>📚 QR Attendance System</h1>
+        <nav>
+            
+            <a href="{% url 'attendance_stu' %}">View Attendance</a>
+            
+        </nav>
+    </header>
+
+    <main class="container">
+
+            <h2>✍️ Mark Attendance</h2>
+
+{% if expired %}
+    <div class="alert alert-danger">❌ This QR Code has expired.</div>
+{% else %}
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Enter Roll No</label>
+            <input type="text" name="roll_no" class="form-control" placeholder="e.g. 21CS001" required>
+        </div>
+        <button type="submit" class="btn btn-success">Mark Present</button>
+    </form>
+{% endif %}
+
+{% if message %}
+    <div class="alert alert-info mt-3">{{ message }}</div>
+{% endif %}
+
+       </main>
+
+    <footer style="text-align:center; margin-top:20px; color:#718093;">
+        <p>&copy; {{ now|date:"Y" }} College QR Attendance System</p>
+    </footer>
+</body>
+</html>

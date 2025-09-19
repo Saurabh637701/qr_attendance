@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Attendance System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #1abc9c;
+      padding: 10px;
+      text-align: center;
+      color: white;
+    }
+    header img {
+      height: 40px;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .card {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 15px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+      padding: 20px;
+    }
+    footer {
+      text-align: center;
+      padding: 10px;
+      color: #bdc3c7;
+      background: #2c3e50;
+    }
+    .team {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #ecf0f1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="{% static 'images/logo.png' %}" alt="College Logo">
+    <span style="font-size: 20px; font-weight: bold;">📚 QR Attendance System</span>
+  </header>
+
+  <main>
+    <div class="card bg-light">
+      <h4 class="text-center mb-3">✍️ Mark Attendance</h4>
+
+      {% if expired %}
+        <div class="alert alert-danger text-center">❌ This QR Code has expired.</div>
+      {% else %}
+        <form method="POST">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Roll No</label>
+            <input type="text" name="roll_no" class="form-control" placeholder="e.g. 21CS001" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date of Birth</label>
+            <input type="date" name="dob" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100">✅ Mark Present</button>
+        </form>
+      {% endif %}
+
+      {% if message %}
+        <div class="alert alert-info mt-3 text-center">{{ message }}</div>
+      {% endif %}
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; {{ now|date:"Y" }} College QR Attendance System</p>
+    <div class="team">
+      Developed by: Alfiya Khanam | Nakul Banjara | Saurabh Saini | Zidan Ali
+    </div>
+  </footer>
+</body>
+</html>

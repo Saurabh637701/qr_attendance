@@ -1,0 +1,59 @@
+{% extends 'qr_app/base.html' %}
+{% block content %}
+<h2>📊 Attendance Dashboard</h2>
+
+<form method="GET" class="row g-3 mb-4">
+    <!-- Subject Filter -->
+    <div class="col-auto">
+        <select name="subject" class="form-select">
+            <option value="">-- Select Subject --</option>
+            {% for subject in subjects %}
+                <option value="{{ subject.id }}" {% if request.GET.subject == subject.id|stringformat:"s" %}selected{% endif %}>
+                    {{ subject.name }} ({{ subject.code }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="col-auto">
+        <input type="date" name="date" class="form-control"
+               value="{{ request.GET.date|default:today }}">
+    </div>
+
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+
+    <!-- Export to CSV -->
+    <div class="col-auto">
+        <a href="?subject={{ request.GET.subject }}&date={{ request.GET.date }}&export=csv"
+           class="btn btn-success">⬇️ Export CSV</a>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Roll No</th>
+            <th>Name</th>
+            <th>Subject</th>
+            <th>Date</th>
+            <th>Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in attendance %}
+        <tr>
+            <td>{{ record.student.roll_no }}</td>
+            <td>{{ record.student.name }}</td>
+            <td>{{ record.qr_session.subject.name }}</td>
+            <td>{{ record.timestamp|date:"Y-m-d" }}</td>
+            <td>{{ record.timestamp|time:"H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No attendance records.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <!-- 🔹 Page Heading -->
+  <div class="text-center mb-4">
+    <h2 class="fw-bold">📊 Dashboard</h2>
+    <p class="text-muted">Manage students, subjects & attendance at one place.</p>
+  </div>
+
+  <!-- 🔹 Stats Cards -->
+  <div class="row g-4 mb-4 text-center">
+    <div class="col-md-3">
+      <div class="card shadow-sm p-3">
+        <h5>👨‍🎓 Students</h5>
+        <h2>{{ students_count|default:"0" }}</h2>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm p-3">
+        <h5>📖 Subjects</h5>
+        <h2>{{ subjects_count|default:"0" }}</h2>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm p-3">
+        <h5>📝 Today’s Attendance</h5>
+        <h2>{{ todays_attendance_count|default:"0" }}</h2>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm p-3">
+        <h5>📑 Reports</h5>
+        <h2>{{ reports_count|default:"0" }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔹 Quick Actions -->
+  <div class="text-center mb-5">
+    <a href="{% url 'add_student' %}" class="btn btn-success m-2">➕ Add Student</a>
+    <a href="{% url 'add_subject' %}" class="btn btn-primary m-2">➕ Add Subject</a>
+    <a href="{% url 'qr_generate' %}" class="btn btn-warning m-2">🔐 Generate QR</a>
+    <a href="{% url 'report' %}" class="btn btn-info m-2">📑 View Reports</a>
+  </div>
+
+  <!-- 🔹 Recent Attendance -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+      <h5 class="mb-0">📅 Recent Attendance Records</h5>
+    </div>
+    <div class="card-body">
+      {% if attendance %}
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Roll No</th>
+            <th>Name</th>
+            <th>Subject</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in attendance|slice:":10" %}
+          <tr>
+            <td>{{ record.student.roll_no }}</td>
+            <td>{{ record.student.name }}</td>
+            <td>{{ record.qr_session.subject.name }}</td>
+            <td>{{ record.timestamp|date:"d-m-Y H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-center text-muted">No attendance records yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

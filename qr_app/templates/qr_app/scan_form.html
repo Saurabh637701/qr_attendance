@@ -1,0 +1,23 @@
+{% extends 'qr_app/base.html' %}
+{% block content %}
+<div class="container text-center">
+    <h3 class="mb-3">Mark Attendance</h3>
+
+    {% if qr_session %}
+        <div class="card p-4 mb-3" style="max-width:420px;margin:auto;">
+            <p><strong>Subject:</strong> {{ qr_session.subject.name }}</p>
+            <p><strong>Expires At:</strong> {{ qr_session.expires_at }}</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="code" value="{{ session_code }}">
+                <input type="text" name="roll_no" class="form-control mb-3" placeholder="Enter Roll No" required>
+                <button class="btn btn-success w-100">Mark Present</button>
+            </form>
+        </div>
+    {% else %}
+        <div class="alert alert-danger">Invalid or expired QR.</div>
+    {% endif %}
+</div>
+{% endblock %}
+

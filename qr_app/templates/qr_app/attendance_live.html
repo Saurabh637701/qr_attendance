@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2 style="text-align:center;">🔐 Generate QR (Branch → Semester → Subject)</h2>
+
+<div class="card" style="max-width:900px;margin:auto;padding:20px;">
+  {% if error %}
+    <div style="color:#c0392b; font-weight:600; margin-bottom:10px;">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" id="qrForm">
+    {% csrf_token %}
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+      <div>
+        <label>Branch</label><br>
+        <select id="id_branch" name="branch">
+          <option value="">-- Select Branch --</option>
+          {% for b in branches %}<option value="{{ b.id }}" {% if b.id|stringformat:"s" == selected_branch_id %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>Year</label><br>
+        <select id="id_year" name="year">
+          <option value="">-- Select Year --</option>
+          <option value="1">1st Year</option>
+          <option value="2">2nd Year</option>
+          <option value="3">3rd Year</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Semester</label><br>
+        <select id="id_semester" name="semester">
+          <option value="">-- Select Semester --</option>
+          <!-- JS will populate semester options based on year -->
+        </select>
+      </div>
+
+      <div>
+        <label>Subject</label><br>
+        <select id="id_subject" name="subject">
+          <option value="">-- Select Subject --</option>
+          {% for s in subjects %}
+            <option value="{{ s.id }}">{{ s.code }} - {{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>Expiry (minutes)</label><br>
+        <input type="number" name="duration" min="1" max="120" value="5">
+      </div>
+
+      <div style="align-self:flex-end;">
+        <button type="submit" class="btn btn-primary">Generate QR</button>
+      </div>
+    </div>
+  </form>
+
+  <hr style="margin:18px 0;">
+
+  <!-- Show QR and link -->
+  {% if qr_code %}
+  <div style="text-align:center;">
+    <h3>QR Code</h3>
+    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="width:240px;height:240px;border:1px solid #ddd;padding:8px;background:white;">
+    <div style="margin-top:12px;">
+      <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
+    </div>
+    <div style="color:gray; margin-top:8px; font-size:14px;">
+  {% if qr_session %}
+    Expires at: {{ qr_session.expires_at }}
+  {% else %}
+    Expires at: —
+  {% endif %}
+</div>
+
+  </div>
+  {% endif %}
+</div>
+
+<script>
+/* semester population based on year */
+function populateSemester() {
+    const year = document.getElementById("id_year").value;
+    const semEl = document.getElementById("id_semester");
+    semEl.innerHTML = "<option value=''>-- Select Semester --</option>";
+    if (year == "1") { semEl.innerHTML += "<option value='1'>Sem 1</option><option value='2'>Sem 2</option>"; }
+    else if (year == "2") { semEl.innerHTML += "<option value='3'>Sem 3</option><option value='4'>Sem 4</option>"; }
+    else if (year == "3") { semEl.innerHTML += "<option value='5'>Sem 5</option><option value='6'>Sem 6</option>"; }
+    // trigger subjects reload
+    loadSubjects();
+}
+
+/* Load subjects via ajax (endpoint: ajax_get_subjects) */
+async function loadSubjects() {
+    const branch = document.getElementById("id_branch").value;
+    const semester = document.getElementById("id_semester").value;
+    const subjectEl = document.getElementById("id_subject");
+    subjectEl.innerHTML = "<option value=''>Loading...</option>";
+
+    if (!branch || !semester) {
+        subjectEl.innerHTML = "<option value=''>-- Select Branch & Semester --</option>";
+        return;
+    }
+    const resp = await fetch("{% url 'ajax_get_subjects' %}?branch=" + branch + "&semester=" + semester);
+    const data = await resp.json();
+    if (!data.results.length) {
+        subjectEl.innerHTML = "<option value=''>No subjects found</option>";
+        return;
+    }
+    let html = "<option value=''>-- Select Subject --</option>";
+    data.results.forEach(s => {
+        html += `<option value="${s.id}">${s.name}</option>`;
+    });
+    subjectEl.innerHTML = html;
+}
+
+/* attach listeners */
+document.addEventListener("DOMContentLoaded", function(){
+    const yearEl = document.getElementById("id_year");
+    const branchEl = document.getElementById("id_branch");
+    const semEl = document.getElementById("id_semester");
+
+    if (yearEl) yearEl.addEventListener("change", populateSemester);
+    if (branchEl) branchEl.addEventListener("change", loadSubjects);
+    if (semEl) semEl.addEventListener("change", loadSubjects);
+
+    // populate semester if page had preselected year (optional)
+    if (yearEl && yearEl.value) populateSemester();
+});
+</script>
+{% endblock %}
