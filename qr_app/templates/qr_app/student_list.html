@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2 style="text-align:center; margin-bottom:20px;">👨‍🎓 Student List</h2>
+
+<!-- 🔹 Top Actions -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+  
+  <!-- Add Student Button -->
+  <a href="{% url 'add_student' %}" class="btn btn-success">➕ Add Student</a>
+
+  <!-- Filter + Search Form -->
+  <form method="get" class="d-flex" style="gap:10px; flex-wrap:wrap;">
+    <select name="branch" class="form-select">
+      <option value="">All Branches</option>
+      {% for b in branches %}
+        <option value="{{ b.id }}" {% if request.GET.branch == b.id|stringformat:"s" %}selected{% endif %}>
+          {{ b.name }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <select name="semester" class="form-select">
+      <option value="">All Semesters</option>
+      {% for key, value in semester_choices %}
+        <option value="{{ key }}" {% if request.GET.semester == key|stringformat:"s" %}selected{% endif %}>
+          {{ value }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <input type="text" name="q" class="form-control" placeholder="Search by Roll No or Name"
+           value="{{ request.GET.q }}">
+
+    <button type="submit" class="btn btn-primary">🔍 Search</button>
+    <a href="{% url 'student_list' %}" class="btn btn-secondary">Reset</a>
+  </form>
+</div>
+
+<!-- 🔹 Student Table -->
+<div class="table-container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Roll No</th>
+        <th>Name</th>
+        <th>Father</th>
+        <th>Mother</th>
+        <th>DOB</th>
+        <th>Year</th>
+        <th>Semester</th>
+        <th>Branch</th>
+        <th>Mobile</th>
+        <th>Email</th>
+        <th>Subjects</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+      <tr>
+        <td>{{ student.roll_no }}</td>
+        <td>{{ student.name }}</td>
+        <td>{{ student.father_name }}</td>
+        <td>{{ student.mother_name }}</td>
+        <td>{{ student.dob|date:"d-m-Y" }}</td>
+        <td>{{ student.get_year_display }}</td>
+        <td>{{ student.get_semester_display }}</td>
+        <td>{{ student.branch.name }}</td>
+        <td>{{ student.mobile }}</td>
+        <td>{{ student.email }}</td>
+        <td>
+          {% for subject in student.subjects.all %}
+            <span class="badge">{{ subject.code }}</span>
+          {% empty %}
+            <span style="color:gray;">No subjects</span>
+          {% endfor %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="11" style="text-align:center; color:gray;">No students found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<style>
+.table-container { max-width: 100%; overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td {
+  padding: 8px 12px; border: 1px solid #ddd; text-align: center;
+}
+.table th { background: #2c3e50; color: white; }
+.badge {
+  background: #27ae60; color: white;
+  padding: 3px 6px; border-radius: 5px;
+  font-size: 12px; margin: 2px; display: inline-block;
+}
+</style>
+{% endblock %}

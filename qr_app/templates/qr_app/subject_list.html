@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2 style="text-align:center; margin-bottom:20px;">📖 Subject List</h2>
+
+<!-- 🔹 Top Actions -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+  <!-- Add Subject Button -->
+  <a href="{% url 'add_subject' %}" class="btn btn-success">➕ Add Subject</a>
+
+  <!-- Filter Form -->
+  <form method="get" class="d-flex" style="gap:10px; flex-wrap:wrap;">
+    <select name="branch" class="form-select">
+      <option value="">All Branches</option>
+      {% for b in branches %}
+        <option value="{{ b.id }}" {% if request.GET.branch == b.id|stringformat:"s" %}selected{% endif %}>
+          {{ b.name }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <select name="semester" class="form-select">
+      <option value="">All Semesters</option>
+      {% for key, value in semester_choices %}
+        <option value="{{ key }}" {% if request.GET.semester == key|stringformat:"s" %}selected{% endif %}>
+          {{ value }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <a href="{% url 'subject_list' %}" class="btn btn-secondary">Reset</a>
+  </form>
+</div>
+
+<!-- 🔹 Subject Table -->
+<div class="table-container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Branch</th>
+        <th>Semester</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for subject in subjects %}
+      <tr>
+        <td>{{ subject.code }}</td>
+        <td>{{ subject.name }}</td>
+        <td>{{ subject.branch.name }}</td>
+        <td>Sem {{ subject.semester }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" style="text-align:center; color:gray;">No subjects found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<style>
+.table-container { max-width: 100%; overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.table th, .table td {
+  padding: 8px 12px; border: 1px solid #ddd; text-align: center;
+}
+.table th { background: #34495e; color: white; }
+</style>
+{% endblock %}

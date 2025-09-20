@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+  <div class="card p-5">
+    <h2>📡 Faculty Attendance — {{ today|date:"d M Y" }}</h2>
+
+    <!-- 🔹 Filter Form -->
+    <form method="get" class="row g-3 mb-3">
+      <div class="col-md-3">
+        <label for="branch" class="form-label">Branch:</label>
+        <select name="branch" id="branch" class="form-select">
+          <option value="">-- All Branches --</option>
+          {% for b in branches %}
+            <option value="{{ b.id }}" {% if request.GET.branch == b.id|stringformat:"s" %}selected{% endif %}>
+              {{ b.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label for="semester" class="form-label">Semester:</label>
+        <select name="semester" id="semester" class="form-select">
+          <option value="">-- All Semesters --</option>
+          {% for key, value in semester_choices %}
+            <option value="{{ key }}" {% if request.GET.semester == key|stringformat:"s" %}selected{% endif %}>
+              {{ value }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label for="subject" class="form-label">Subject:</label>
+        <select name="subject" id="subject" class="form-select">
+          <option value="">-- All Subjects --</option>
+          {% for s in subjects %}
+            <option value="{{ s.id }}" {% if selected_subject and selected_subject.id == s.id %}selected{% endif %}>
+              {{ s.code }} — {{ s.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+      </div>
+    </form>
+
+    <!-- 🔹 Export Buttons -->
+    {% if attendance %}
+      <div class="mb-3">
+        <a href="?{% if request.GET.branch %}branch={{ request.GET.branch }}&{% endif %}
+                   {% if request.GET.semester %}semester={{ request.GET.semester }}&{% endif %}
+                   {% if selected_subject %}subject={{ selected_subject.id }}&{% endif %}export=csv"
+           class="btn btn-success btn-sm">⬇️ Export CSV</a>
+
+        <a href="?{% if request.GET.branch %}branch={{ request.GET.branch }}&{% endif %}
+                   {% if request.GET.semester %}semester={{ request.GET.semester }}&{% endif %}
+                   {% if selected_subject %}subject={{ selected_subject.id }}&{% endif %}export=pdf"
+           class="btn btn-danger btn-sm">⬇️ Export PDF</a>
+      </div>
+    {% endif %}
+
+    <!-- 🔹 Attendance Table -->
+    <table class="table table-striped table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Roll No</th>
+          <th>Name</th>
+          <th>Subject</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in attendance %}
+        <tr>
+          <td>{{ record.student.roll_no }}</td>
+          <td>{{ record.student.name }}</td>
+          <td>{{ record.qr_session.subject.name }}</td>
+          <td>{{ record.timestamp|time:"H:i:s" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center text-muted">No attendance records for today.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
