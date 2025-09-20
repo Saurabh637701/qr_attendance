@@ -12,7 +12,12 @@ s.connect(("8.8.8.8", 80))
 server_ip = s.getsockname()[0]
 
 # 🔹 Automatically allow localhost + detected LAN IP
-ALLOWED_HOSTS = ['127.0.0.1', '10.218.31.108', 'localhost', f"{server_ip}", '*' ]
+ALLOWED_HOSTS = ["qrattendance-production-5d22.up.railway.app", '127.0.0.1', '10.218.31.108', 'localhost', f"{server_ip}", '*' ]
+
+# ✅ CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = [
+    "https://qrattendance-production-5d22.up.railway.app"
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -77,4 +82,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "qr_app" / "static"]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
