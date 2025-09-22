@@ -1,0 +1,168 @@
+{% load static %}
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login — QR Attendance</title>
+
+  <style>
+    :root{
+      --bg1: #0f172a; /* deep navy */
+      --bg2: #0b1220; /* darker */
+      --glass: rgba(255,255,255,0.06);
+      --glass-2: rgba(255,255,255,0.08);
+      --accent: rgba(99,102,241,0.95); /* indigo */
+      --accent-2: rgba(45,212,191,0.95); /* teal */
+      --text: #e6eef8;
+      --muted: rgba(230,238,248,0.7);
+      --radius: 14px;
+      --maxw: 420px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    /* Full-page animated gradient background */
+    html,body{height:100%;margin:0}
+    body{
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(99,102,241,0.12), transparent 8%),
+                  radial-gradient(900px 500px at 90% 90%, rgba(45,212,191,0.06), transparent 8%),
+                  linear-gradient(180deg,var(--bg1), var(--bg2));
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow:hidden;
+    }
+
+    /* floating decorative blobs */
+    .blob{
+      position:fixed; z-index:0; filter: blur(40px); opacity:0.62;
+      transform-origin:center;
+      mix-blend-mode:screen;
+      animation: float 8s ease-in-out infinite;
+    }
+    .blob.b1{width:420px;height:420px;left:-80px;top:-60px;background:linear-gradient(135deg,var(--accent), #7c3aed); animation-duration:11s}
+    .blob.b2{width:320px;height:320px;right:-60px;bottom:-40px;background:linear-gradient(135deg,var(--accent-2), #06b6d4); animation-duration:9s}
+    @keyframes float{0%{transform:translateY(0) scale(1)}50%{transform:translateY(18px) scale(1.03)}100%{transform:translateY(0) scale(1)}}
+
+    /* Center card */
+    .wrap{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px}
+    .card{
+      width:100%;max-width:var(--maxw);background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border-radius:var(--radius);backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      padding:28px; border:1px solid rgba(255,255,255,0.04);
+      display:flex;flex-direction:column;gap:18px;box-sizing:border-box;
+    }
+
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent), var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:white;box-shadow:0 6px 18px rgba(15,23,42,0.6)}
+    .brand h1{font-size:18px;margin:0}
+    .brand p{margin:0;font-size:12px;color:var(--muted)}
+
+    form{display:flex;flex-direction:column;gap:14px}
+    label{font-size:13px;color:var(--muted)}
+
+    .field{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;gap:8px}
+    .field input{flex:1;background:transparent;border:0;color:var(--text);outline:none;font-size:15px}
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600;font-size:15px;
+      background:linear-gradient(90deg,var(--accent), var(--accent-2));color:white;box-shadow:0 8px 20px rgba(99,102,241,0.18);
+      transition:transform .16s ease, box-shadow .16s ease;
+    }
+    .btn:active{transform:translateY(1px)}
+
+    .muted-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+
+    /* messages */
+    .messages{background:linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01));border-radius:10px;padding:10px;border:1px solid rgba(255,100,100,0.08);color:#ffd7d7}
+
+    /* small footer */
+    .foot{text-align:center;font-size:13px;color:var(--muted);margin-top:4px}
+
+    /* responsive tweaks */
+    @media(max-width:520px){
+      .card{padding:18px;border-radius:12px}
+      .brand h1{font-size:16px}
+      .logo{width:44px;height:44px}
+    }
+  </style>
+</head>
+<body>
+  <!-- decorative blobs -->
+  <div class="blob b1" aria-hidden="true"></div>
+  <div class="blob b2" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <main class="card" role="main" aria-labelledby="login-heading">
+
+      <header class="brand">
+        <div class="logo">QR</div>
+        <div>
+          <h1 id="login-heading">QR Attendance — Login</h1>
+          <p>Apne admin dwara banayi gayi ID se login karein</p>
+        </div>
+      </header>
+
+      {% if messages %}
+        <div class="messages" role="alert">
+          {% for msg in messages %}
+            {{ msg }}<br>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div>
+          <label for="id_username">Username</label>
+          <div class="field">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <input id="id_username" name="username" type="text" placeholder="Username" required autocomplete="username">
+          </div>
+        </div>
+
+        <div>
+          <label for="id_password">Password</label>
+          <div class="field">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="4" width="8" height="6" rx="3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <input id="id_password" name="password" type="password" placeholder="Password" required autocomplete="current-password">
+          </div>
+        </div>
+
+        <div class="muted-row">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)"><input type="checkbox" name="remember"> Remember</label>
+          <a href="#" style="color:var(--muted);text-decoration:none;font-size:13px">Forgot?</a>
+        </div>
+
+        <button class="btn" type="submit">Sign in</button>
+      </form>
+
+      <div class="foot">© {{ now|date:"Y" }} QR Attendance</div>
+    </main>
+  </div>
+
+  <script>
+    // small accessibility + UX enhancements
+    (function(){
+      // autofocus on username for larger screens
+      try{ if(window.innerWidth>420){document.getElementById('id_username').focus()} }catch(e){}
+      // subtle tilt on card based on pointer (desktop only)
+      const card = document.querySelector('.card');
+      if(card && window.matchMedia('(pointer:fine)').matches){
+        document.addEventListener('mousemove', e=>{
+          const rect = card.getBoundingClientRect();
+          const cx = rect.left + rect.width/2;
+          const cy = rect.top + rect.height/2;
+          const dx = (e.clientX - cx)/rect.width;
+          const dy = (e.clientY - cy)/rect.height;
+          card.style.transform = `perspective(900px) rotateX(${(-dy*4).toFixed(2)}deg) rotateY(${(dx*6).toFixed(2)}deg)`;
+        });
+        document.addEventListener('mouseleave', ()=>card.style.transform='');
+      }
+    })();
+  </script>
+</body>
+</html>
