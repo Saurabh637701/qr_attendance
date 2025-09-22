@@ -1,5 +1,6 @@
 from pathlib import Path
 import socket
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'qr_app',
+    'login',
 ]
 
 MIDDLEWARE = [
@@ -44,6 +46,7 @@ ROOT_URLCONF = 'qr_attendance.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'DIRS': [BASE_DIR / "qr_app" / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -82,5 +85,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "qr_app" / "static"]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 
