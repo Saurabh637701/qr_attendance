@@ -22,8 +22,8 @@ urlpatterns = [
     path("qr/generate/", views.generate_qr, name="attendance_live"),
 
     # Attendance
-    path("form/<uuid:token>/", views.attendance_form, name="attendance_form"),
-    path("attendance/form/<uuid:token>/", views.attendance_form, name="attendance_form"),
+    path("form/<str:token>/", views.attendance_form, name="attendance_form"),
+    path("attendance/form/<str:token>/", views.attendance_form, name="attendance_form"),
     path("attendance/dashboard/", views.attendance_dashboard, name="attendance_dashboard"),
     path("attendance/faculty/", views.attendance_faculty, name="attendance_faculty"),
     path("attendance/stu/", views.attendance_stu, name="attendance_stu"),
@@ -37,6 +37,7 @@ urlpatterns = [
     path("success/", views.success, name="success"),
     path("error/", views.error, name="error"),
 ]
+
 
 
 
