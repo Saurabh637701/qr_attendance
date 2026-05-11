@@ -661,7 +661,7 @@ def generate_qr(request):
             )
 
             # 🔥 NGROK URL
-            QR_URL = "https://attendance-system-d27j.onrender.com/"
+            QR_URL = "https://attendance-system-d27j.onrender.com"
 
             # 🔥 Attendance path
             qr_path = reverse("attendance_form", args=[token])
