@@ -661,13 +661,13 @@ def generate_qr(request):
             )
 
             # 🔥 NGROK URL
-            NGROK_URL = "https://mooned-mom-unlikable.ngrok-free.dev"
+            URL = "https://attendance-system-d27j.onrender.com/"
 
             # 🔥 Attendance path
             qr_path = reverse("attendance_form", args=[token])
 
             # 🔥 FINAL QR URL
-            qr_url = f"{NGROK_URL}{qr_path}"
+            qr_url = f"{URL}{qr_path}"
 
             # QR generate
             qr_img = qrcode.make(qr_url)
