@@ -14,29 +14,18 @@ s.connect(("8.8.8.8", 80))
 server_ip = s.getsockname()[0]
 
 # 🔹 Automatically allow localhost + detected LAN IP
-ALLOWED_HOSTS = [".onrender.com", "qrattendance-production-5d22.up.railway.app", ".ngrok-free.app", "ngrok-free.dev", "mooned-mom-unlikable.ngrok-free.dev", '127.0.0.1', '10.218.31.108', 'localhost', f"{server_ip}", '*' ]
+ALLOWED_HOSTS = [".onrender.com", "qrattendance-production-5d22.up.railway.app", "https://attendance-system-d27j.onrender.com", "ngrok-free.dev", "mooned-mom-unlikable.ngrok-free.dev", '127.0.0.1', '10.218.31.108', 'localhost', f"{server_ip}", '*' ]
 
 # ✅ CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
     "https://qrattendance-production-5d22.up.railway.app",
     "https://*.ngrok-free.dev",
-    "https://*.ngrok-free.app",
+    "https://attendance-system-d27j.onrender.com",
     "https://mooned-mom-unlikable.ngrok-free.dev"
 ]
 
-
-NGROK_URL = os.environ.get("NGROK_URL")
-
-if NGROK_URL:
-    ALLOWED_HOSTS.append(
-        NGROK_URL.replace("https://", "")
-    )
-
-    CSRF_TRUSTED_ORIGINS = [NGROK_URL]
-
-
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 INSTALLED_APPS = [
     'django.contrib.admin',
